@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<HBox spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ivf.companion.controller.DoctorDashboardController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <!-- Left Pane: Patient Selection Panel -->
+    <VBox prefWidth="350.0" spacing="15.0" styleClass="card">
+        <Label styleClass="header-label" text="Assigned Patients Portal" />
+        <TextField fx:id="searchField" promptText="🔍 Search patients by name..." />
+        
+        <ListView fx:id="patientListView" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: -border-glass; -fx-border-radius: 6px;" />
+        
+        <Label style="-fx-text-fill: -text-muted; -fx-font-size: 11px;" text="Only patients assigned to your care are listed." />
+    </VBox>
+
+    <!-- Right Pane: Clinical Monitoring & Action Portal -->
+    <StackPane HBox.hgrow="ALWAYS" styleClass="card">
+        <!-- Default State: No patient selected -->
+        <VBox fx:id="placeholderView" alignment="CENTER" spacing="15.0">
+            <Label text="🩺 Clinical Workspace" styleClass="title-label" />
+            <Label styleClass="subtitle-label" text="Select a patient from the panel to view baseline metrics, cycle logs, and manage prescriptions." />
+        </VBox>
+        
+        <!-- Active Workspace: Patient Selected -->
+        <VBox fx:id="clinicalWorkspace" spacing="20.0" visible="false">
+            <!-- Patient Header -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+                <VBox HBox.hgrow="ALWAYS">
+                    <Label fx:id="patientNameLabel" text="Patient Name" styleClass="title-label" />
+                    <Label fx:id="patientBioLabel" text="Age: - • History Summary" styleClass="subtitle-label" wrapText="true" />
+                </VBox>
+                <Label fx:id="patientCycleBadge" styleClass="badge" text="STIMULATION" style="-fx-font-size: 13px;" />
+            </HBox>
+            
+            <Separator style="-fx-background-color: -border-glass; -fx-opacity: 0.1;" />
+            
+            <!-- Hormone & Ovarian Baseline Row -->
+            <HBox spacing="15.0">
+                <VBox HBox.hgrow="ALWAYS" spacing="5.0" style="-fx-background-color: rgba(255,255,255,0.02); -fx-background-radius: 8px; -fx-padding: 12px; -fx-border-color: -border-glass; -fx-border-radius: 8px;">
+                    <Label text="AMH LEVEL" style="-fx-font-size: 11px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+                    <Label fx:id="patientAmhLabel" text="2.4 ng/mL" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                </VBox>
+                <VBox HBox.hgrow="ALWAYS" spacing="5.0" style="-fx-background-color: rgba(255,255,255,0.02); -fx-background-radius: 8px; -fx-padding: 12px; -fx-border-color: -border-glass; -fx-border-radius: 8px;">
+                    <Label text="FSH LEVEL" style="-fx-font-size: 11px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+                    <Label fx:id="patientFshLabel" text="6.5 mIU/mL" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                </VBox>
+                <VBox HBox.hgrow="ALWAYS" spacing="5.0" style="-fx-background-color: rgba(255,255,255,0.02); -fx-background-radius: 8px; -fx-padding: 12px; -fx-border-color: -border-glass; -fx-border-radius: 8px;">
+                    <Label text="CYCLE STATUS" style="-fx-font-size: 11px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+                    <Label fx:id="patientCycleDayLabel" text="Day 11 (Stimulation)" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -primary-teal;" />
+                </VBox>
+            </HBox>
+            
+            <!-- Tab Pane for Workspace Details -->
+            <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+                <!-- Tab 1: Symptoms Logs -->
+                <Tab text="Physiological Logs">
+                    <VBox spacing="10.0" style="-fx-padding: 15px 0;">
+                        <TableView fx:id="patientLogsTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colLogDate" text="Date" prefWidth="100.0" />
+                                <TableColumn fx:id="colLogMood" text="Mood" prefWidth="100.0" />
+                                <TableColumn fx:id="colLogSymptoms" text="Symptoms Logged" prefWidth="200.0" />
+                                <TableColumn fx:id="colLogEstrogen" text="Estrogen Level" prefWidth="120.0" />
+                                <TableColumn fx:id="colLogSleep" text="Sleep (hrs)" prefWidth="90.0" />
+                                <TableColumn fx:id="colLogNotes" text="Patient Notes" prefWidth="250.0" />
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </Tab>
+                
+                <!-- Tab 2: Manage Prescriptions -->
+                <Tab text="Manage Medications">
+                    <HBox spacing="15.0" style="-fx-padding: 15px 0;">
+                        <!-- Prescriptions List -->
+                        <VBox HBox.hgrow="ALWAYS" spacing="10.0">
+                            <Label styleClass="header-label" text="Current Prescribed Protocol" style="-fx-font-size: 15px;" />
+                            <TableView fx:id="patientMedsTable" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colMedName" text="Medication" prefWidth="150.0" />
+                                    <TableColumn fx:id="colMedDosage" text="Dosage" prefWidth="90.0" />
+                                    <TableColumn fx:id="colMedTime" text="Schedule" prefWidth="90.0" />
+                                    <TableColumn fx:id="colMedStart" text="Start" prefWidth="100.0" />
+                                    <TableColumn fx:id="colMedEnd" text="End" prefWidth="100.0" />
+                                    <TableColumn fx:id="colMedAdherence" text="Adherence" prefWidth="90.0" />
+                                </columns>
+                            </TableView>
+                        </VBox>
+                        
+                        <!-- Add Prescription Form -->
+                        <VBox spacing="12.0" prefWidth="280.0" styleClass="card" style="-fx-padding: 15px; -fx-background-color: rgba(255,255,255,0.01);">
+                            <Label styleClass="header-label" text="Prescribe Medication" style="-fx-font-size: 15px;" />
+                            
+                            <VBox spacing="5.0">
+                                <Label text="Medication Name" style="-fx-font-size: 11px; -fx-font-weight: bold;" />
+                                <TextField fx:id="prescNameField" promptText="e.g. Gonal-F" style="-fx-padding: 8px;" />
+                            </VBox>
+                            
+                            <VBox spacing="5.0">
+                                <Label text="Dosage Amount" style="-fx-font-size: 11px; -fx-font-weight: bold;" />
+                                <TextField fx:id="prescDosageField" promptText="e.g. 225 IU" style="-fx-padding: 8px;" />
+                            </VBox>
+                            
+                            <VBox spacing="5.0">
+                                <Label text="Time of Day" style="-fx-font-size: 11px; -fx-font-weight: bold;" />
+                                <TextField fx:id="prescTimeField" promptText="e.g. 08:00 PM" style="-fx-padding: 8px;" />
+                            </VBox>
+                            
+                            <HBox spacing="10.0">
+                                <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                                    <Label text="Start Date" style="-fx-font-size: 11px; -fx-font-weight: bold;" />
+                                    <DatePicker fx:id="prescStartDatePicker" style="-fx-padding: 2px;" />
+                                </VBox>
+                                <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                                    <Label text="End Date" style="-fx-font-size: 11px; -fx-font-weight: bold;" />
+                                    <DatePicker fx:id="prescEndDatePicker" style="-fx-padding: 2px;" />
+                                </VBox>
+                            </HBox>
+                            
+                            <VBox spacing="5.0">
+                                <Label text="Special Instructions" style="-fx-font-size: 11px; -fx-font-weight: bold;" />
+                                <TextField fx:id="prescInstructionField" promptText="e.g. Subcutaneous" style="-fx-padding: 8px;" />
+                            </VBox>
+                            
+                            <Label fx:id="prescErrorLabel" style="-fx-text-fill: -primary-rose; -fx-font-size: 11px;" visible="false" wrapText="true" />
+                            
+                            <Button onAction="#handlePrescribe" maxWidth="Infinity" text="Issue Prescription">
+                                <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn-primary" />
+                                </styleClass>
+                            </Button>
+                        </VBox>
+                    </HBox>
+                </Tab>
+            </TabPane>
+        </VBox>
+    </StackPane>
+</HBox>

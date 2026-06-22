@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import java.lang.String?>
+
+<HBox prefHeight="700.0" prefWidth="1100.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ivf.companion.controller.LoginController">
+    <!-- Left Pane - Brand Container -->
+    <VBox alignment="CENTER_LEFT" prefWidth="420.0" spacing="25.0" styleClass="sidebar">
+        <padding>
+            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+        </padding>
+        <Label styleClass="title-label" text="IVF Companion" />
+        <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Your Guided Journey to Parenthood" />
+        
+        <VBox spacing="15.0">
+            <Label styleClass="subtitle-label" wrapText="true" text="• Advanced AI Treatment Recommendations" />
+            <Label styleClass="subtitle-label" wrapText="true" text="• Comprehensive Cycle Monitoring &amp; Medications" />
+            <Label styleClass="subtitle-label" wrapText="true" text="• Secure Messaging with Fertility Specialists" />
+            <Label styleClass="subtitle-label" wrapText="true" text="• Emotional Wellness Community &amp; Support Forums" />
+        </VBox>
+        
+        <Region VBox.vgrow="ALWAYS" />
+        <Label style="-fx-text-fill: -text-muted; -fx-font-size: 12px;" text="© 2026 IVF Companion. All rights reserved." />
+    </VBox>
+
+    <!-- Right Pane - Interactive Forms -->
+    <StackPane HBox.hgrow="ALWAYS" style="-fx-background-color: -bg-darker;">
+        <padding>
+            <Insets bottom="40.0" left="60.0" right="60.0" top="40.0" />
+        </padding>
+        
+        <!-- Login Mode Pane -->
+        <VBox fx:id="loginPane" alignment="CENTER_LEFT" spacing="20.0" maxWidth="450.0">
+            <Label styleClass="title-label" text="Welcome Back" />
+            <Label styleClass="subtitle-label" text="Enter your credentials to access your secure IVF companion dashboard." />
+            
+            <VBox spacing="8.0">
+                <Label text="Username" style="-fx-font-weight: bold;" />
+                <TextField fx:id="loginUsernameField" promptText="Enter your username" />
+            </VBox>
+            
+            <VBox spacing="8.0">
+                <Label text="Password" style="-fx-font-weight: bold;" />
+                <PasswordField fx:id="loginPasswordField" promptText="Enter your password" />
+            </VBox>
+            
+            <Label fx:id="loginErrorLabel" style="-fx-text-fill: -primary-rose; -fx-font-weight: bold;" visible="false" wrapText="true" />
+            
+            <Button fx:id="loginBtn" maxWidth="Infinity" onAction="#handleLogin" text="Sign In" >
+                <styleClass>
+                    <String fx:value="btn" />
+                    <String fx:value="btn-primary" />
+                </styleClass>
+            </Button>
+            
+            <HBox alignment="CENTER" spacing="10.0">
+                <Label text="Don't have an account?" styleClass="subtitle-label" />
+                <Hyperlink onAction="#toggleViewMode" styleClass="btn-link" text="Register now" />
+            </HBox>
+            
+            <Separator style="-fx-background-color: -border-glass; -fx-opacity: 0.2;" />
+            
+            <!-- Quick Login Section -->
+            <VBox spacing="10.0" alignment="CENTER">
+                <Label text="QUICK LOGINS FOR DEMO TESTING" style="-fx-font-size: 11px; -fx-text-fill: -text-muted; -fx-font-weight: bold;" />
+                <HBox spacing="10.0" alignment="CENTER">
+                    <Button onAction="#quickLoginPatient" text="Sarah (Patient)" style="-fx-font-size: 12px; -fx-padding: 6px 12px;">
+                        <styleClass>
+                            <String fx:value="btn" />
+                            <String fx:value="btn-secondary" />
+                        </styleClass>
+                    </Button>
+                    <Button onAction="#quickLoginDoctor" text="Dr. Alexander (Doctor)" style="-fx-font-size: 12px; -fx-padding: 6px 12px;">
+                        <styleClass>
+                            <String fx:value="btn" />
+                            <String fx:value="btn-secondary" />
+                        </styleClass>
+                    </Button>
+                    <Button onAction="#quickLoginAdmin" text="Dr. Elizabeth (Admin)" style="-fx-font-size: 12px; -fx-padding: 6px 12px;">
+                        <styleClass>
+                            <String fx:value="btn" />
+                            <String fx:value="btn-secondary" />
+                        </styleClass>
+                    </Button>
+                </HBox>
+            </VBox>
+        </VBox>
+        
+        <!-- Registration Mode Pane (Scrollable to fit all inputs) -->
+        <ScrollPane fx:id="registerPane" visible="false" fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox alignment="CENTER_LEFT" spacing="20.0" maxWidth="450.0" style="-fx-padding: 20px 0;">
+                <Label styleClass="title-label" text="Create Account" />
+                <Label styleClass="subtitle-label" text="Register to start tracking your cycle or managing your patient profiles." />
+                
+                <VBox spacing="8.0">
+                    <Label text="Username" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="regUsernameField" promptText="Choose a username" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="Email Address" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="regEmailField" promptText="Enter your email" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="Full Name" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="regFullNameField" promptText="Enter your first and last name" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="Password" style="-fx-font-weight: bold;" />
+                    <PasswordField fx:id="regPasswordField" promptText="Create a secure password" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="I am registering as a..." style="-fx-font-weight: bold;" />
+                    <ComboBox fx:id="regRoleComboBox" maxWidth="Infinity" promptText="Select your role" />
+                </VBox>
+                
+                <!-- Dynamic Patient Fields Container -->
+                <VBox fx:id="patientFieldsContainer" spacing="15.0" visible="false" managed="false" styleClass="card" style="-fx-background-color: rgba(255,255,255,0.02);">
+                    <Label text="Patient Demographics" styleClass="header-label" />
+                    
+                    <VBox spacing="8.0">
+                        <Label text="Date of Birth" style="-fx-font-weight: bold;" />
+                        <DatePicker fx:id="patientDobPicker" maxWidth="Infinity" promptText="Select your date of birth" />
+                    </VBox>
+                    
+                    <HBox spacing="10.0">
+                        <VBox HBox.hgrow="ALWAYS" spacing="8.0">
+                            <Label text="AMH Level (ng/mL)" style="-fx-font-weight: bold;" />
+                            <TextField fx:id="patientAmhField" promptText="e.g. 2.1" />
+                        </VBox>
+                        <VBox HBox.hgrow="ALWAYS" spacing="8.0">
+                            <Label text="FSH Level (mIU/mL)" style="-fx-font-weight: bold;" />
+                            <TextField fx:id="patientFshField" promptText="e.g. 6.4" />
+                        </VBox>
+                    </HBox>
+                    
+                    <VBox spacing="8.0">
+                        <Label text="Medical History Notes" style="-fx-font-weight: bold;" />
+                        <TextArea fx:id="patientHistoryArea" prefHeight="80.0" promptText="Describe any existing conditions, previous pregnancies, or fertility history..." wrapText="true" />
+                    </VBox>
+                </VBox>
+                
+                <!-- Dynamic Doctor Fields Container -->
+                <VBox fx:id="doctorFieldsContainer" spacing="15.0" visible="false" managed="false" styleClass="card" style="-fx-background-color: rgba(255,255,255,0.02);">
+                    <Label text="Medical Professional Credentials" styleClass="header-label" />
+                    
+                    <VBox spacing="8.0">
+                        <Label text="Medical License Number" style="-fx-font-weight: bold;" />
+                        <TextField fx:id="docLicenseField" promptText="e.g. RE-123456" />
+                    </VBox>
+                    
+                    <VBox spacing="8.0">
+                        <Label text="Clinical Specialization" style="-fx-font-weight: bold;" />
+                        <TextField fx:id="docSpecializationField" promptText="e.g. Reproductive Endocrinology" />
+                    </VBox>
+                    
+                    <VBox spacing="8.0">
+                        <Label text="Clinic/Hospital Name" style="-fx-font-weight: bold;" />
+                        <TextField fx:id="docClinicField" promptText="e.g. Center for Reproductive Medicine" />
+                    </VBox>
+                </VBox>
+                
+                <Label fx:id="regErrorLabel" style="-fx-text-fill: -primary-rose; -fx-font-weight: bold;" visible="false" wrapText="true" />
+                
+                <Button fx:id="registerBtn" maxWidth="Infinity" onAction="#handleRegister" text="Register Account">
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn-primary" />
+                    </styleClass>
+                </Button>
+                
+                <HBox alignment="CENTER" spacing="10.0">
+                    <Label text="Already have an account?" styleClass="subtitle-label" />
+                    <Hyperlink onAction="#toggleViewMode" styleClass="btn-link" text="Sign in here" />
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </StackPane>
+</HBox>

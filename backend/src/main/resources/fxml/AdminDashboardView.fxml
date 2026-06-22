@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<VBox spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ivf.companion.controller.AdminDashboardController">
+    <padding>
+        <Insets bottom="35.0" left="35.0" right="35.0" top="35.0" />
+    </padding>
+
+    <!-- Header Section -->
+    <VBox spacing="5.0">
+        <Label styleClass="title-label" text="Root Administration Panel" />
+        <Label styleClass="subtitle-label" text="Platform-wide statistics, active user directory control, and security block management." />
+    </VBox>
+
+    <!-- Platform Stats Dashboard -->
+    <HBox spacing="20.0">
+        <!-- Stat Card 1 -->
+        <VBox HBox.hgrow="ALWAYS" spacing="5.0" styleClass="card" style="-fx-padding: 15px;">
+            <Label text="TOTAL USERS" style="-fx-font-size: 11px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalUsers" text="-" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" />
+        </VBox>
+        <!-- Stat Card 2 -->
+        <VBox HBox.hgrow="ALWAYS" spacing="5.0" styleClass="card" style="-fx-padding: 15px;">
+            <Label text="ACTIVE PATIENTS" style="-fx-font-size: 11px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalPatients" text="-" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: -primary-teal;" />
+        </VBox>
+        <!-- Stat Card 3 -->
+        <VBox HBox.hgrow="ALWAYS" spacing="5.0" styleClass="card" style="-fx-padding: 15px;">
+            <Label text="CLINICAL DOCTORS" style="-fx-font-size: 11px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalDoctors" text="-" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: -primary-rose;" />
+        </VBox>
+        <!-- Stat Card 4 -->
+        <VBox HBox.hgrow="ALWAYS" spacing="5.0" styleClass="card" style="-fx-padding: 15px;">
+            <Label text="ACTIVE IVF CYCLES" style="-fx-font-size: 11px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalCycles" text="-" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;" />
+        </VBox>
+    </HBox>
+
+    <!-- User Directory Management -->
+    <VBox spacing="15.0" styleClass="card" VBox.vgrow="ALWAYS">
+        <Label styleClass="header-label" text="Platform User Directory" />
+        
+        <!-- Filter Controls -->
+        <HBox spacing="15.0" alignment="CENTER_LEFT">
+            <TextField fx:id="adminSearchField" promptText="🔍 Search user by username, email, full name..." HBox.hgrow="ALWAYS" />
+            <ComboBox fx:id="adminRoleFilterComboBox" prefWidth="180.0" promptText="Filter by Role" />
+        </HBox>
+        
+        <!-- TableView -->
+        <TableView fx:id="adminUsersTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colAdminId" text="ID" prefWidth="60.0" />
+                <TableColumn fx:id="colAdminUsername" text="Username" prefWidth="120.0" />
+                <TableColumn fx:id="colAdminFullName" text="Full Name" prefWidth="160.0" />
+                <TableColumn fx:id="colAdminEmail" text="Email Address" prefWidth="200.0" />
+                <TableColumn fx:id="colAdminRole" text="User Role" prefWidth="120.0" />
+                <TableColumn fx:id="colAdminStatus" text="Account Status" prefWidth="110.0" />
+                <TableColumn fx:id="colAdminCreated" text="Registration Date" prefWidth="150.0" />
+            </columns>
+        </TableView>
+        
+        <!-- Bottom Controls -->
+        <HBox spacing="15.0" alignment="CENTER_RIGHT">
+            <Label fx:id="adminStatusLabel" style="-fx-text-fill: -primary-teal; -fx-font-weight: bold;" visible="false" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnToggleActive" onAction="#handleToggleActive" text="Toggle Account Access">
+                <styleClass>
+                    <String fx:value="btn" />
+                    <String fx:value="btn-primary" />
+                </styleClass>
+            </Button>
+            <Button fx:id="btnDeleteUser" onAction="#handleDeleteUser" text="Delete User Account">
+                <styleClass>
+                    <String fx:value="btn" />
+                    <String fx:value="btn-rose" />
+                </styleClass>
+            </Button>
+        </HBox>
+    </VBox>
+</VBox>

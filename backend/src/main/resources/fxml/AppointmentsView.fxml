@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<HBox spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ivf.companion.controller.AppointmentsController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <!-- Left Column: Appointments Schedule List -->
+    <VBox HBox.hgrow="ALWAYS" spacing="15.0" styleClass="card">
+        <Label styleClass="header-label" text="Appointments Schedule" />
+        <Label styleClass="subtitle-label" text="Follicular ultrasound scans, clinician consultations, and embryo transfer procedures." />
+        
+        <TableView fx:id="appointmentsTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colAppDate" text="Date &amp; Time" prefWidth="150.0" />
+                <TableColumn fx:id="colAppTitle" text="Visit Category" prefWidth="180.0" />
+                <TableColumn fx:id="colAppUser" text="Clinician / Patient" prefWidth="160.0" />
+                <TableColumn fx:id="colAppStatus" text="Status" prefWidth="100.0" />
+                <TableColumn fx:id="colAppNotes" text="Preparation Instructions" prefWidth="250.0" />
+            </columns>
+        </TableView>
+        
+        <Separator style="-fx-background-color: -border-glass; -fx-opacity: 0.1;" />
+        
+        <!-- PDF Export Area -->
+        <HBox spacing="15.0" alignment="CENTER_LEFT">
+            <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+                <Label styleClass="header-label" text="Clinical Summary Exporter" style="-fx-font-size: 14px;" />
+                <Label styleClass="subtitle-label" text="Export comprehensive historical logs, ovarian reserves, and medications into a secure print-ready PDF." style="-fx-font-size: 11px;" wrapText="true" />
+            </VBox>
+            
+            <ComboBox fx:id="pdfPatientSelector" prefWidth="200.0" promptText="Select Patient" visible="false" managed="false" />
+            
+            <Button fx:id="btnDownloadPdf" onAction="#handleGeneratePdf" text="📥 Export PDF Report">
+                <styleClass>
+                    <String fx:value="btn" />
+                    <String fx:value="btn-primary" />
+                </styleClass>
+            </Button>
+        </HBox>
+    </VBox>
+
+    <!-- Right Column: Booking Panel -->
+    <VBox prefWidth="380.0" spacing="15.0" styleClass="card">
+        <Label styleClass="header-label" text="Book Appointment" />
+        <Label styleClass="subtitle-label" text="Reserve scheduling slots under clinical authorization guidelines." wrapText="true" />
+        
+        <Separator style="-fx-background-color: -border-glass; -fx-opacity: 0.1;" />
+        
+        <VBox spacing="12.0" VBox.vgrow="ALWAYS">
+            <VBox spacing="6.0">
+                <Label text="Visit Category / Title" style="-fx-font-weight: bold;" />
+                <TextField fx:id="appTitleField" promptText="e.g. Monitoring Scan, consultation" />
+            </VBox>
+            
+            <VBox spacing="6.0">
+                <Label text="Appointment Date" style="-fx-font-weight: bold;" />
+                <DatePicker fx:id="appDatePicker" maxWidth="Infinity" promptText="Select Date" />
+            </VBox>
+            
+            <VBox spacing="6.0">
+                <Label text="Preferred Time Slot" style="-fx-font-weight: bold;" />
+                <TextField fx:id="appTimeField" promptText="e.g. 09:30 AM, 14:00" />
+            </VBox>
+            
+            <VBox spacing="6.0">
+                <Label fx:id="appUserSelectorLabel" text="Clinician Specialist" style="-fx-font-weight: bold;" />
+                <ComboBox fx:id="appUserComboBox" maxWidth="Infinity" />
+            </VBox>
+            
+            <VBox spacing="6.0">
+                <Label text="Preparation Instructions / Notes" style="-fx-font-weight: bold;" />
+                <TextArea fx:id="appNotesArea" prefHeight="80.0" promptText="Any special patient preparation or clinic requirements..." wrapText="true" />
+            </VBox>
+            
+            <Label fx:id="appErrorLabel" style="-fx-text-fill: -primary-rose; -fx-font-size: 11px; -fx-font-weight: bold;" visible="false" wrapText="true" />
+            
+            <Region VBox.vgrow="ALWAYS" />
+            
+            <Button onAction="#handleBookAppointment" maxWidth="Infinity" text="Confirm Reservation">
+                <styleClass>
+                    <String fx:value="btn" />
+                    <String fx:value="btn-primary" />
+                </styleClass>
+            </Button>
+        </VBox>
+    </VBox>
+</HBox>

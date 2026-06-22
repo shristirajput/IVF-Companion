@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ivf.companion.controller.PatientDashboardController">
+    <content>
+        <VBox spacing="20.0">
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+            
+            <!-- Welcome Header -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+                <VBox HBox.hgrow="ALWAYS">
+                    <Label fx:id="welcomeTitle" styleClass="title-label" text="Sarah Jenkins's IVF Hub" />
+                    <Label styleClass="subtitle-label" text="Real-time cycle progression, medication tracking, and physiological feedback." />
+                </VBox>
+                <Label fx:id="cycleStageBadge" styleClass="badge" text="STIMULATION PHASE" style="-fx-font-size: 14px; -fx-padding: 8px 16px;" />
+            </HBox>
+            
+            <!-- Top Dashboard Stats Row -->
+            <HBox spacing="20.0">
+                <!-- Card 1: Cycle Progress Tracker -->
+                <VBox HBox.hgrow="ALWAYS" spacing="12.0">
+                    <styleClass>
+                        <String fx:value="card" />
+                        <String fx:value="card-teal" />
+                    </styleClass>
+                    <Label styleClass="header-label" text="Stimulation Cycle Timeline" />
+                    <HBox alignment="CENTER_LEFT">
+                        <Label fx:id="cycleDayLabel" text="Day 11" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label text="Estimated length: 14 days" styleClass="subtitle-label" />
+                    </HBox>
+                    <ProgressBar fx:id="cycleProgressBar" maxWidth="Infinity" progress="0.78" style="-fx-pref-height: 10px;" />
+                    <Label fx:id="nextActionLabel" text="Next Protocol Action: Follow-up ultrasound tomorrow at 9:30 AM" style="-fx-text-fill: -primary-teal; -fx-font-weight: bold;" wrapText="true" />
+                </VBox>
+                
+                <!-- Card 2: Biological Baseline -->
+                <VBox spacing="10.0" minWidth="380.0">
+                    <styleClass>
+                        <String fx:value="card" />
+                    </styleClass>
+                    <Label styleClass="header-label" text="Ovarian Reserve Markers" />
+                    <GridPane hgap="15.0" vgap="10.0">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="120.0" />
+                            <ColumnConstraints hgrow="ALWAYS" />
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints minHeight="25.0" />
+                            <RowConstraints minHeight="25.0" />
+                            <RowConstraints minHeight="25.0" />
+                        </rowConstraints>
+                        
+                        <Label text="AMH Level (Reserve):" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="subtitle-label" />
+                        <Label fx:id="amhLabel" text="2.4 ng/mL" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-font-weight: bold; -fx-text-fill: white;" />
+                        
+                        <Label text="FSH Level (Stimulation):" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="subtitle-label" />
+                        <Label fx:id="fshLabel" text="6.5 mIU/mL" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-font-weight: bold; -fx-text-fill: white;" />
+                        
+                        <Label text="Assigned Specialist:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="subtitle-label" />
+                        <Label fx:id="assignedDoctorLabel" text="Dr. Alexander Fleming" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-font-weight: bold; -fx-text-fill: white;" />
+                    </GridPane>
+                </VBox>
+            </HBox>
+            
+            <!-- Middle Layout: Medication Checklist & Hormone Chart -->
+            <HBox spacing="20.0">
+                <!-- Left: Medication Adherence -->
+                <VBox HBox.hgrow="ALWAYS" spacing="15.0" styleClass="card" maxWidth="480.0">
+                    <Label styleClass="header-label" text="Medications Checklist (Today)" />
+                    <Label styleClass="subtitle-label" text="Check off your daily hormone injections as you administer them." />
+                    
+                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" prefHeight="220.0">
+                        <VBox fx:id="medsChecklistContainer" spacing="12.0" />
+                    </ScrollPane>
+                </VBox>
+                
+                <!-- Right: Hormone Progress Chart -->
+                <VBox HBox.hgrow="ALWAYS" spacing="15.0" styleClass="card">
+                    <Label styleClass="header-label" text="Estrogen Level Timeline (pg/mL)" />
+                    <LineChart fx:id="hormoneChart" legendVisible="false" prefHeight="240.0" createSymbols="true">
+                        <xAxis>
+                            <CategoryAxis label="Date" fx:id="xAxis" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Level" fx:id="yAxis" forceZeroInRange="false" />
+                        </yAxis>
+                    </LineChart>
+                </VBox>
+            </HBox>
+            
+            <!-- Bottom Layout: Health History & Action -->
+            <VBox spacing="15.0" styleClass="card">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                        <Label styleClass="header-label" text="Daily Symptoms &amp; Physiological Logs" />
+                        <Label styleClass="subtitle-label" text="Your logs are visible to your doctor to monitor hyperstimulation risk factors." />
+                    </VBox>
+                    <Button onAction="#showAddLogDialog" text="+ Log Today's Vitals">
+                        <styleClass>
+                            <String fx:value="btn" />
+                            <String fx:value="btn-primary" />
+                        </styleClass>
+                    </Button>
+                </HBox>
+                
+                <TableView fx:id="logsTable" prefHeight="200.0">
+                    <columns>
+                        <TableColumn fx:id="colDate" text="Date" prefWidth="100.0" />
+                        <TableColumn fx:id="colMood" text="Mood" prefWidth="100.0" />
+                        <TableColumn fx:id="colSymptoms" text="Symptoms" prefWidth="180.0" />
+                        <TableColumn fx:id="colEstrogen" text="Estrogen (pg/mL)" prefWidth="120.0" />
+                        <TableColumn fx:id="colSleep" text="Sleep (hrs)" prefWidth="90.0" />
+                        <TableColumn fx:id="colWeight" text="Weight (kg)" prefWidth="90.0" />
+                        <TableColumn fx:id="colNotes" text="Notes" prefWidth="250.0" />
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

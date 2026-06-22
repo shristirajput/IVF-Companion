@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<HBox prefHeight="780.0" prefWidth="1200.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ivf.companion.controller.MainController">
+    <!-- Left Navigation Sidebar -->
+    <VBox spacing="10.0" styleClass="sidebar" prefWidth="250.0" minWidth="250.0">
+        <padding>
+            <Insets bottom="20.0" left="15.0" right="15.0" top="30.0" />
+        </padding>
+        
+        <!-- Logo -->
+        <Label styleClass="title-label" text="IVF Companion" style="-fx-font-size: 20px; -fx-padding: 0 0 10px 10px;" />
+        
+        <!-- User Badge Card -->
+        <VBox spacing="5.0" style="-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 8px; -fx-padding: 12px; -fx-margin: 0 0 20px 0;">
+            <Label fx:id="userNameLabel" text="Full Name" style="-fx-font-weight: bold; -fx-text-fill: white;" />
+            <Label fx:id="userRoleBadge" text="ROLE" styleClass="badge" />
+        </VBox>
+        
+        <Separator style="-fx-background-color: -border-glass; -fx-opacity: 0.1; -fx-padding: 0 0 15px 0;" />
+        
+        <!-- Navigation Items -->
+        <VBox spacing="8.0" VBox.vgrow="ALWAYS">
+            <!-- Patient Dashboard Option -->
+            <Button fx:id="btnPatientDash" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#showPatientDashboard" text="Patient Dashboard">
+                <styleClass>
+                    <String fx:value="nav-btn" />
+                </styleClass>
+            </Button>
+            
+            <!-- Doctor Dashboard Option -->
+            <Button fx:id="btnDoctorDash" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#showDoctorDashboard" text="Doctor Dashboard">
+                <styleClass>
+                    <String fx:value="nav-btn" />
+                </styleClass>
+            </Button>
+            
+            <!-- Admin Dashboard Option -->
+            <Button fx:id="btnAdminDash" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#showAdminDashboard" text="Admin Panel">
+                <styleClass>
+                    <String fx:value="nav-btn" />
+                </styleClass>
+            </Button>
+            
+            <!-- AI Treatment Recommendations -->
+            <Button fx:id="btnRecommendations" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#showRecommendations" text="AI Recommendations">
+                <styleClass>
+                    <String fx:value="nav-btn" />
+                </styleClass>
+            </Button>
+            
+            <!-- Appointments -->
+            <Button fx:id="btnAppointments" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#showAppointments" text="Appointments &amp; PDFs">
+                <styleClass>
+                    <String fx:value="nav-btn" />
+                </styleClass>
+            </Button>
+            
+            <!-- Community Forum -->
+            <Button fx:id="btnCommunity" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#showCommunity" text="Wellness Forum">
+                <styleClass>
+                    <String fx:value="nav-btn" />
+                </styleClass>
+            </Button>
+        </VBox>
+        
+        <!-- Footer / Logout -->
+        <VBox spacing="10.0">
+            <Button fx:id="btnLogout" alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#handleLogout" text="Sign Out">
+                <styleClass>
+                    <String fx:value="btn" />
+                    <String fx:value="btn-rose" />
+                </styleClass>
+            </Button>
+            <Label alignment="CENTER" maxWidth="Infinity" style="-fx-text-fill: -text-muted; -fx-font-size: 11px;" text="IVF Companion v1.0 Desktop" />
+        </VBox>
+    </VBox>
+
+    <!-- Main Content Display Pane -->
+    <StackPane fx:id="contentArea" HBox.hgrow="ALWAYS" style="-fx-background-color: -bg-darker;" />
+</HBox>

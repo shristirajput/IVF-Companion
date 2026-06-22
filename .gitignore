@@ -1,0 +1,17 @@
+# Backend
+backend/target/
+backend/*.jar
+backend/.idea/
+backend/.vscode/
+backend/*.iml
+backend/.mvn/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.vscode/
+
+# Database / OS
+.DS_Store
+*.sqlite3

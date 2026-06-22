@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<HBox spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ivf.companion.controller.CommunityController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <!-- Left Column: Forum Posts Directory -->
+    <VBox prefWidth="420.0" spacing="15.0" styleClass="card">
+        <HBox alignment="CENTER_LEFT">
+            <Label styleClass="header-label" text="Wellness Community" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#showNewPostDialog" text="+ New Post" style="-fx-font-size: 12px; -fx-padding: 6px 14px;">
+                <styleClass>
+                    <String fx:value="btn" />
+                    <String fx:value="btn-primary" />
+                </styleClass>
+            </Button>
+        </HBox>
+        <Label styleClass="subtitle-label" text="Connect with peers and fertility doctors anonymously or with your full profile." wrapText="true" />
+        
+        <ListView fx:id="postsListView" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: -border-glass; -fx-border-radius: 6px;" />
+    </VBox>
+
+    <!-- Right Column: Selected Thread & Discussion -->
+    <StackPane HBox.hgrow="ALWAYS" styleClass="card">
+        <!-- Default State: No thread selected -->
+        <VBox fx:id="postPlaceholder" alignment="CENTER" spacing="15.0">
+            <Label text="💬 Community Discussion" styleClass="title-label" />
+            <Label styleClass="subtitle-label" text="Select a forum thread from the directory to participate in discussions, read specialist advice, and share your experiences." wrapText="true" style="-fx-alignment: center;" />
+        </VBox>
+        
+        <!-- Active State: Thread Details & Comment List -->
+        <VBox fx:id="threadWorkspace" spacing="15.0" visible="false">
+            <!-- Post Detail Card -->
+            <VBox spacing="10.0" styleClass="card" style="-fx-background-color: rgba(255,255,255,0.02); -fx-padding: 15px;">
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label fx:id="threadAuthorLabel" text="Author" style="-fx-font-weight: bold; -fx-text-fill: -primary-teal;" />
+                    <Label fx:id="threadDateLabel" text="Timestamp" styleClass="subtitle-label" style="-fx-font-size: 11px;" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label fx:id="threadCategoryLabel" text="STIMULATION" styleClass="badge" style="-fx-font-size: 10px; -fx-padding: 2px 8px;" />
+                </HBox>
+                <Label fx:id="threadTitleLabel" text="Post Title" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" wrapText="true" />
+                <Label fx:id="threadContentLabel" text="Post Content body details..." style="-fx-text-fill: -text-primary; -fx-font-size: 13px;" wrapText="true" />
+            </VBox>
+            
+            <Label text="Discussion Replies" styleClass="header-label" style="-fx-font-size: 14px;" />
+            
+            <!-- Scrollable Comments VBox -->
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                <VBox fx:id="commentsContainer" spacing="10.0" style="-fx-padding: 0 5px 0 0;" />
+            </ScrollPane>
+            
+            <Separator style="-fx-background-color: -border-glass; -fx-opacity: 0.1;" />
+            
+            <!-- Reply Input Box -->
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <TextField fx:id="replyTextField" promptText="Write a supportive reply or ask a follow-up question..." HBox.hgrow="ALWAYS" onAction="#handlePostComment" />
+                <Button onAction="#handlePostComment" text="Post Reply">
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn-primary" />
+                    </styleClass>
+                </Button>
+            </HBox>
+        </VBox>
+    </StackPane>
+</HBox>

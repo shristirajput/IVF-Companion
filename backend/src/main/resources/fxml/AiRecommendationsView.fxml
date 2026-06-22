@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<HBox spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ivf.companion.controller.AiRecommendationsController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <!-- Left Pane: Parameter Input Form -->
+    <VBox prefWidth="380.0" spacing="15.0" styleClass="card">
+        <Label styleClass="header-label" text="Clinical Decision Parameters" />
+        <Label styleClass="subtitle-label" text="Provide patient clinical markers to query the IVF companion rule engine." wrapText="true" />
+        
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+            <VBox spacing="15.0" style="-fx-padding: 0 5px 0 0;">
+                <VBox spacing="6.0">
+                    <Label text="Patient Age" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="ageField" promptText="e.g. 32" />
+                </VBox>
+                
+                <HBox spacing="10.0">
+                    <VBox HBox.hgrow="ALWAYS" spacing="6.0">
+                        <Label text="AMH Level (ng/mL)" style="-fx-font-weight: bold;" />
+                        <TextField fx:id="amhField" promptText="e.g. 2.4" />
+                    </VBox>
+                    <VBox HBox.hgrow="ALWAYS" spacing="6.0">
+                        <Label text="FSH Level (mIU/mL)" style="-fx-font-weight: bold;" />
+                        <TextField fx:id="fshField" promptText="e.g. 6.5" />
+                    </VBox>
+                </HBox>
+                
+                <VBox spacing="6.0">
+                    <Label text="Duration of Infertility (Years)" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="infertilityYearsField" promptText="e.g. 3" />
+                </VBox>
+                
+                <VBox spacing="6.0">
+                    <Label text="Previous IVF Cycles Attempted" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="prevCyclesField" promptText="e.g. 0" />
+                </VBox>
+                
+                <VBox spacing="6.0">
+                    <Label text="Primary Diagnostic Classification" style="-fx-font-weight: bold;" />
+                    <ComboBox fx:id="diagnosisComboBox" maxWidth="Infinity" promptText="Select diagnosis" />
+                </VBox>
+                
+                <Label fx:id="formErrorLabel" style="-fx-text-fill: -primary-rose; -fx-font-size: 12px; -fx-font-weight: bold;" visible="false" wrapText="true" />
+                
+                <!-- Helper quick fill button -->
+                <Button onAction="#quickFillSarah" maxWidth="Infinity" text="Quick Fill Sarah's Vitals">
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn-secondary" />
+                    </styleClass>
+                </Button>
+            </VBox>
+        </ScrollPane>
+        
+        <Button onAction="#handleAnalyze" maxWidth="Infinity" text="Generate Clinical Protocol">
+            <styleClass>
+                <String fx:value="btn" />
+                <String fx:value="btn-primary" />
+            </styleClass>
+        </Button>
+    </VBox>
+
+    <!-- Right Pane: AI Recommendation Outcomes -->
+    <StackPane HBox.hgrow="ALWAYS" styleClass="card">
+        <!-- Default State: No analysis run yet -->
+        <VBox fx:id="outcomePlaceholder" alignment="CENTER" spacing="15.0">
+            <Label text="💡 IVF Protocol Predictor" styleClass="title-label" />
+            <Label styleClass="subtitle-label" text="Fill the clinical baseline form on the left and run analysis to receive customized treatment paths, pharmaceutical regimens, and stress-reduction therapies." wrapText="true" style="-fx-alignment: center;" />
+        </VBox>
+        
+        <!-- Active State: Outcome Rendered -->
+        <ScrollPane fx:id="outcomeReportView" visible="false" fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox spacing="20.0" style="-fx-padding: 10px;">
+                <!-- Header stats card -->
+                <HBox spacing="15.0" styleClass="card" style="-fx-background-color: rgba(13, 148, 136, 0.05); -fx-border-color: rgba(13, 148, 136, 0.2);">
+                    <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                        <Label text="RECOMMENDED CLINICAL PROTOCOL" style="-fx-font-size: 11px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+                        <Label fx:id="recommendedMethodLabel" text="Standard IVF Antagonist Protocol" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;" wrapText="true" />
+                    </VBox>
+                    <Separator orientation="VERTICAL" style="-fx-background-color: -border-glass; -fx-opacity: 0.1;" />
+                    <VBox alignment="CENTER" prefWidth="180.0" spacing="3.0">
+                        <Label text="ESTIMATED SUCCESS" style="-fx-font-size: 10px; -fx-text-fill: -text-secondary; -fx-font-weight: bold;" />
+                        <Label fx:id="successRateLabel" text="60.0%" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: -primary-teal;" />
+                        <Label fx:id="successLikelihoodLabel" text="HIGH LIKELIHOOD" styleClass="badge" style="-fx-font-size: 10px; -fx-padding: 2px 6px;" />
+                    </VBox>
+                </HBox>
+                
+                <!-- Clinical Rationale VBox -->
+                <VBox spacing="10.0">
+                    <Label styleClass="header-label" text="📋 Clinical Action Rationale" />
+                    <VBox fx:id="rationaleListContainer" spacing="8.0" styleClass="card" style="-fx-background-color: rgba(255,255,255,0.01); -fx-padding: 15px;" />
+                </VBox>
+                
+                <!-- Pharmaceutical Protocol VBox -->
+                <VBox spacing="10.0">
+                    <Label styleClass="header-label" text="💊 Suggested Stimulation Regimen" />
+                    <VBox fx:id="medsListContainer" spacing="8.0" styleClass="card" style="-fx-background-color: rgba(255,255,255,0.01); -fx-padding: 15px;" />
+                </VBox>
+                
+                <!-- Stress Management & Wellness VBox -->
+                <VBox spacing="10.0">
+                    <Label styleClass="header-label" text="🧘 Recommended Emotional Wellness Plan" />
+                    <VBox fx:id="wellnessListContainer" spacing="8.0" styleClass="card" style="-fx-background-color: rgba(255,255,255,0.01); -fx-padding: 15px;" />
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </StackPane>
+</HBox>
