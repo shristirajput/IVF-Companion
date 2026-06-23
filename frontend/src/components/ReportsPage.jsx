@@ -25,7 +25,7 @@ export default function ReportsPage() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/api/health-logs');
+      const res = await api.get('/api/patient/logs');
       setLogs(res.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }

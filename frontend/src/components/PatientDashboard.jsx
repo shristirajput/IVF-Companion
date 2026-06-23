@@ -54,7 +54,7 @@ export default function PatientDashboard() {
       setLoading(true);
       const [cycleRes, logsRes, medsRes] = await Promise.all([
         api.get('/api/cycles/current').catch(() => ({ data: null })),
-        api.get('/api/health-logs').catch(() => ({ data: [] })),
+        api.get('/api/patient/logs').catch(() => ({ data: [] })),
         api.get('/api/medications/current').catch(() => ({ data: [] }))
       ]);
       setCycle(cycleRes.data);
@@ -68,7 +68,7 @@ export default function PatientDashboard() {
   const handleLogSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/health-logs', {
+      await api.post('/api/patient/logs', {
         date: new Date().toISOString().split('T')[0],
         mood: newLog.mood,
         symptoms: newLog.symptoms,
@@ -150,10 +150,38 @@ export default function PatientDashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Profile Card */}
+        <div className="sp-card p-6 md:p-8 animate-fade-up">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="sp-icon-container sp-icon-teal"><User className="w-5 h-5" /></div>
+            <div>
+              <h2 className="text-lg font-bold" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Patient Profile</h2>
+              <p className="text-xs" style={{ color: 'var(--sp-outline)' }}>Clinical details</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b" style={{ borderColor: 'var(--sp-surface-container)' }}>
+              <span className="text-sm font-semibold" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Age</span>
+              <span className="text-sm font-bold" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{user?.age || '—'} yrs</span>
+            </div>
+            <div className="flex justify-between items-center pb-3 border-b" style={{ borderColor: 'var(--sp-surface-container)' }}>
+              <span className="text-sm font-semibold" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>AMH Level</span>
+              <span className="text-sm font-bold" style={{ color: 'var(--sp-primary)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{user?.amhLevel || '—'} ng/mL</span>
+            </div>
+            <div className="flex justify-between items-center pb-3 border-b" style={{ borderColor: 'var(--sp-surface-container)' }}>
+              <span className="text-sm font-semibold" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>FSH Level</span>
+              <span className="text-sm font-bold" style={{ color: 'var(--sp-secondary)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{user?.fshLevel || '—'} mIU/mL</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-semibold" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Physician</span>
+              <span className="text-sm font-bold" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{user?.assignedDoctorName ? `Dr. ${user.assignedDoctorName}` : 'Unassigned'}</span>
+            </div>
+          </div>
+        </div>
 
         {/* Cycle Progress */}
-        <div className="sp-card p-6 lg:col-span-2 animate-fade-up" style={{ animationDelay: '0.25s' }}>
+        <div className="sp-card p-6 md:p-8 lg:col-span-2 animate-fade-up" style={{ animationDelay: '0.25s' }}>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <div className="sp-icon-container sp-icon-primary">
