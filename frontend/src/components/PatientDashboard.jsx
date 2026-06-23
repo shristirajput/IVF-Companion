@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import {
   Activity, ActivitySquare, Pill, Plus, CalendarPlus, PackageOpen,
-  Upload, FileCheck, TrendingUp, Heart, Moon, Zap, ArrowRight, CheckCircle2
+  Upload, FileCheck, TrendingUp, Heart, Moon, Zap, ArrowRight, CheckCircle2, User
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
