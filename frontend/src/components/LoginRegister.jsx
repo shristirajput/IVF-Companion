@@ -6,9 +6,9 @@ import { LogIn, UserPlus, Mail, Lock, User, Calendar, AlertCircle, Stethoscope, 
 const DEMO_ACCOUNTS = [
   {
     label: 'Doctor',
-    username: 'dr_smith',
-    password: 'password',
-    name: 'Dr. Sarah Smith',
+    username: 'doctor',
+    password: 'doctor123',
+    name: 'Dr. Alexander Fleming',
     icon: Stethoscope,
     color: 'var(--sp-secondary)',
     bg: 'rgba(0,105,112,0.08)',
@@ -17,7 +17,7 @@ const DEMO_ACCOUNTS = [
   {
     label: 'Admin',
     username: 'admin',
-    password: 'password',
+    password: 'admin123',
     name: 'System Administrator',
     icon: ShieldCheck,
     color: 'var(--sp-primary)',
