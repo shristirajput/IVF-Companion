@@ -45,6 +45,8 @@ export default function AdminDashboard() {
     finally { setActionLoading(false); }
   };
 
+  const [filter, setFilter] = useState('ALL');
+
   if (loading || !stats) {
     return (
       <div className="max-w-[1200px] mx-auto px-6 py-8">
@@ -58,13 +60,23 @@ export default function AdminDashboard() {
   }
 
   const statCards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'var(--sp-primary)' },
-    { label: 'Patients', value: stats.totalPatients, icon: Activity, color: 'var(--sp-secondary)' },
-    { label: 'Doctors', value: stats.totalDoctors, icon: Database, color: 'var(--sp-primary)' },
-    { label: 'IVF Cycles', value: stats.totalCycles, icon: Activity, color: 'var(--sp-secondary)' },
-    { label: 'Appointments', value: stats.totalAppointments, icon: Calendar, color: 'var(--sp-primary)' },
-    { label: 'Forum Posts', value: stats.totalForumPosts, icon: FileText, color: 'var(--sp-secondary)' },
+    { id: 'ALL', label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'var(--sp-primary)' },
+    { id: 'ROLE_PATIENT', label: 'Patients', value: stats.totalPatients, icon: Activity, color: 'var(--sp-secondary)' },
+    { id: 'ROLE_DOCTOR', label: 'Doctors', value: stats.totalDoctors, icon: Database, color: 'var(--sp-primary)' },
+    { id: 'CYCLES', label: 'IVF Cycles', value: stats.totalCycles, icon: Activity, color: 'var(--sp-secondary)' },
+    { id: 'APPOINTMENTS', label: 'Appointments', value: stats.totalAppointments, icon: Calendar, color: 'var(--sp-primary)' },
+    { id: 'POSTS', label: 'Forum Posts', value: stats.totalForumPosts, icon: FileText, color: 'var(--sp-secondary)' },
   ];
+
+  const handleCardClick = (id) => {
+    if (['ALL', 'ROLE_PATIENT', 'ROLE_DOCTOR'].includes(id)) {
+      setFilter(id);
+    } else {
+      alert(`Detailed view for ${id} will be available in the upcoming Analytics module!`);
+    }
+  };
+
+  const filteredUsers = users.filter(u => filter === 'ALL' || u.role === filter || (filter === 'ROLE_PATIENT' && u.role === 'PATIENT') || (filter === 'ROLE_DOCTOR' && u.role === 'DOCTOR'));
 
   return (
     <div className="max-w-[1200px] mx-auto px-6 py-8 animate-fade-in">
@@ -78,26 +90,37 @@ export default function AdminDashboard() {
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           const isPrimary = stat.color === 'var(--sp-primary)';
+          const isActive = filter === stat.id;
           return (
-            <div key={index} className="sp-card p-5 flex flex-col items-center justify-center text-center">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" 
-                   style={{ background: isPrimary ? 'var(--sp-primary-container)' : 'var(--sp-secondary-container)' }}>
-                <Icon className="w-5 h-5" style={{ color: stat.color }} />
+            <button 
+              key={index} 
+              onClick={() => handleCardClick(stat.id)}
+              className="sp-card p-5 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.03] active:scale-[0.98]"
+              style={{ border: isActive ? `2px solid ${stat.color}` : '1px solid var(--sp-surface-container)' }}
+            >
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors" 
+                   style={{ background: isActive ? stat.color : (isPrimary ? 'var(--sp-primary-container)' : 'var(--sp-secondary-container)') }}>
+                <Icon className="w-5 h-5" style={{ color: isActive ? '#fff' : stat.color }} />
               </div>
               <p className="text-2xl font-bold mb-1" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{stat.value}</p>
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{stat.label}</p>
-            </div>
+            </button>
           );
         })}
       </div>
 
       {/* Users List */}
       <div className="sp-card overflow-hidden animate-fade-up" style={{ animationDelay: '0.1s' }}>
-        <div className="p-6 border-b" style={{ background: 'var(--sp-surface-low)', borderColor: 'var(--sp-outline-var)' }}>
+        <div className="p-6 border-b flex justify-between items-center" style={{ background: 'var(--sp-surface-low)', borderColor: 'var(--sp-outline-var)' }}>
           <h2 className="text-base font-bold flex items-center gap-2" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             <Users className="w-5 h-5" style={{ color: 'var(--sp-primary)' }} />
-            Platform Users
+            {filter === 'ROLE_PATIENT' ? 'Patients' : filter === 'ROLE_DOCTOR' ? 'Doctors' : 'All Platform Users'}
           </h2>
+          {filter !== 'ALL' && (
+            <button onClick={() => setFilter('ALL')} className="text-xs font-bold text-blue-600 hover:underline">
+              Clear Filter
+            </button>
+          )}
         </div>
         
         <div className="overflow-x-auto">
@@ -113,7 +136,7 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {filteredUsers.map((u) => (
                 <tr key={u.id} className="transition-colors hover:bg-black/5" style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
                   <td className="p-4">
                     <div className="flex items-center gap-3">

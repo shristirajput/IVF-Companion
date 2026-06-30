@@ -2,6 +2,8 @@ package com.ivf.companion.controller;
 
 import com.ivf.companion.exception.ResourceNotFoundException;
 import com.ivf.companion.model.User;
+import com.ivf.companion.model.Patient;
+import com.ivf.companion.model.Doctor;
 import com.ivf.companion.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
