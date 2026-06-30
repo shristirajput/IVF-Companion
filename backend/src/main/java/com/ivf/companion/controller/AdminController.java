@@ -37,9 +37,28 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
         List<User> users = userRepository.findAll();
-        // Remove password for security in listing
-        users.forEach(u -> u.setPassword(null));
-        return ResponseEntity.ok(users);
+        
+        List<Map<String, Object>> response = users.stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", u.getId());
+            map.put("username", u.getUsername());
+            map.put("email", u.getEmail());
+            map.put("fullName", u.getFullName());
+            map.put("role", u.getRole());
+            map.put("active", u.isActive());
+            map.put("createdAt", u.getCreatedAt());
+            
+            if ("PATIENT".equals(u.getRole())) {
+                patientRepository.findByUserId(u.getId()).ifPresent(p -> {
+                    if (p.getAssignedDoctor() != null) {
+                        map.put("assignedDoctorId", p.getAssignedDoctor().getId());
+                    }
+                });
+            }
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+        
+        return ResponseEntity.ok(response);
     }
 
     // Toggle active status (block / unblock user)
@@ -78,5 +97,26 @@ public class AdminController {
         stats.put("totalForumPosts", totalForumPosts);
 
         return ResponseEntity.ok(stats);
+    }
+
+    // Get all doctors for assignment dropdown
+    @GetMapping("/doctors")
+    public ResponseEntity<?> getAllDoctors() {
+        return ResponseEntity.ok(doctorRepository.findAll());
+    }
+
+    // Assign a doctor to a patient
+    @PutMapping("/users/{userId}/assign-doctor/{doctorId}")
+    public ResponseEntity<?> assignDoctorToPatient(@PathVariable Long userId, @PathVariable Long doctorId) {
+        Patient patient = patientRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found for this user"));
+        
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+
+        patient.setAssignedDoctor(doctor);
+        patientRepository.save(patient);
+        
+        return ResponseEntity.ok().build();
     }
 }

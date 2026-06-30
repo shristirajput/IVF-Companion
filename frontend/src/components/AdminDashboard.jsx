@@ -5,6 +5,7 @@ import { Users, UserX, Activity, Calendar, FileText, Database } from 'lucide-rea
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -13,12 +14,14 @@ export default function AdminDashboard() {
   const fetchAdminData = async () => {
     try {
       setLoading(true);
-      const [statsRes, usersRes] = await Promise.all([
+      const [statsRes, usersRes, doctorsRes] = await Promise.all([
         api.get('/api/admin/stats'),
-        api.get('/api/admin/users')
+        api.get('/api/admin/users'),
+        api.get('/api/admin/doctors')
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data);
+      setDoctors(doctorsRes.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -29,6 +32,16 @@ export default function AdminDashboard() {
       await api.put(`/api/admin/users/${userId}/toggle-active`);
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, active: !u.active } : u));
     } catch (e) { alert('Failed to toggle user status. Admin root cannot be blocked.'); }
+    finally { setActionLoading(false); }
+  };
+
+  const handleAssignDoctor = async (userId, doctorId) => {
+    if (!doctorId) return;
+    try {
+      setActionLoading(true);
+      await api.put(`/api/admin/users/${userId}/assign-doctor/${doctorId}`);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, assignedDoctorId: parseInt(doctorId) } : u));
+    } catch (e) { alert('Failed to assign doctor.'); }
     finally { setActionLoading(false); }
   };
 
@@ -95,6 +108,7 @@ export default function AdminDashboard() {
                 <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Role</th>
                 <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Status</th>
                 <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Joined</th>
+                <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Assigned Doctor</th>
                 <th className="p-4 text-xs font-bold uppercase tracking-widest text-right" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Actions</th>
               </tr>
             </thead>
@@ -125,6 +139,23 @@ export default function AdminDashboard() {
                   </td>
                   <td className="p-4 text-sm" style={{ color: 'var(--sp-on-surface-var)' }}>
                     {new Date(u.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="p-4">
+                    {u.role === 'PATIENT' ? (
+                      <select 
+                        className="sp-input text-xs h-8 py-0 px-2"
+                        value={u.assignedDoctorId || ''}
+                        onChange={(e) => handleAssignDoctor(u.id, e.target.value)}
+                        disabled={actionLoading}
+                      >
+                        <option value="">-- Assign Doctor --</option>
+                        {doctors.map(d => (
+                          <option key={d.id} value={d.id}>Dr. {d.user?.fullName || 'Unknown'}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="text-xs text-slate-400">N/A</span>
+                    )}
                   </td>
                   <td className="p-4 text-right">
                     <button
