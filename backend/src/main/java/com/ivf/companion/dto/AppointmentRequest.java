@@ -16,7 +16,6 @@ public class AppointmentRequest {
     private String title;
 
     @NotNull(message = "Appointment date/time is required")
-    @Future(message = "Appointment must be scheduled in the future")
     private LocalDateTime dateTime;
 
     private String notes;

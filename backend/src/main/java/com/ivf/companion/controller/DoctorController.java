@@ -76,6 +76,37 @@ public class DoctorController {
         return ResponseEntity.ok(response);
     }
 
+    // Get unassigned patients
+    @GetMapping("/unassigned-patients")
+    public ResponseEntity<?> getUnassignedPatients() {
+        List<Patient> patients = patientRepository.findAll().stream()
+            .filter(p -> p.getAssignedDoctor() == null)
+            .collect(Collectors.toList());
+            
+        List<Map<String, Object>> response = patients.stream().map(patient -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("patientId", patient.getId());
+            map.put("fullName", patient.getUser().getFullName());
+            map.put("email", patient.getUser().getEmail());
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+    // Doctor claims a patient
+    @PutMapping("/patients/{patientId}/claim")
+    public ResponseEntity<?> claimPatient(@PathVariable Long patientId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Doctor doctor = doctorRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
+                
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+                
+        patient.setAssignedDoctor(doctor);
+        patientRepository.save(patient);
+        return ResponseEntity.ok().build();
+    }
+
     // View specific patient's health logs
     @GetMapping("/patients/{patientId}/logs")
     public ResponseEntity<?> getPatientLogs(@PathVariable Long patientId, @AuthenticationPrincipal UserPrincipal userPrincipal) {

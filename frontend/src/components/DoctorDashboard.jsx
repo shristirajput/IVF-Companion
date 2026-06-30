@@ -43,6 +43,7 @@ const STATUS_COLORS = {
 export default function DoctorDashboard() {
   const { user } = useAuth();
   const [patients, setPatients] = useState([]);
+  const [unassignedPatients, setUnassignedPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patientLogs, setPatientLogs] = useState([]);
@@ -59,12 +60,14 @@ export default function DoctorDashboard() {
   const fetchAll = async () => {
     try {
       setLoading(true);
-      const [patientsRes, apptRes] = await Promise.all([
+      const [patientsRes, apptRes, unassignedRes] = await Promise.all([
         api.get('/api/doctor/patients').catch(() => ({ data: [] })),
         api.get('/api/doctor/appointments').catch(() => ({ data: [] })),
+        api.get('/api/doctor/unassigned-patients').catch(() => ({ data: [] })),
       ]);
       setPatients(patientsRes.data);
       setAppointments(apptRes.data);
+      setUnassignedPatients(unassignedRes.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -98,12 +101,18 @@ export default function DoctorDashboard() {
     setAppointments(res.data);
   };
 
-  const handleApptStatusUpdate = async (apptId, status) => {
+  const handleStatusChange = async (apptId, newStatus) => {
     try {
-      await api.put(`/api/doctor/appointments/${apptId}/status`, { status });
-      const res = await api.get('/api/doctor/appointments');
-      setAppointments(res.data);
-    } catch (e) { alert('Failed to update appointment.'); }
+      await api.put(`/api/doctor/appointments/${apptId}/status`, { status: newStatus });
+      setAppointments(prev => prev.map(a => a.id === apptId ? { ...a, status: newStatus } : a));
+    } catch (e) { alert('Failed to update status.'); }
+  };
+
+  const handleClaimPatient = async (patientId) => {
+    try {
+      await api.put(`/api/doctor/patients/${patientId}/claim`);
+      fetchAll();
+    } catch (e) { alert('Failed to claim patient.'); }
   };
 
   const chartData = patientLogs.slice().reverse()
@@ -199,46 +208,71 @@ export default function DoctorDashboard() {
                 </div>
               </div>
               <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-                {patients.length > 0 ? patients.map(p => {
-                  const isSelected = selectedPatient?.patientId === p.patientId;
-                  const initials = p.fullName?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-                  return (
-                    <button
-                      key={p.patientId}
-                      onClick={() => handleSelectPatient(p.patientId)}
-                      className="w-full text-left p-3 rounded-xl border transition-all duration-200"
-                      style={{
-                        background: isSelected ? 'var(--sp-primary-fixed)' : 'var(--sp-surface-low)',
-                        borderColor: isSelected ? 'var(--sp-primary)' : 'var(--sp-outline-var)',
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                             style={{
-                               background: isSelected ? 'var(--sp-primary-container)' : 'var(--sp-surface-highest)',
-                               color: isSelected ? '#fff' : 'var(--sp-on-surface-var)',
-                               fontFamily: '"Plus Jakarta Sans", sans-serif'
-                             }}>
-                          {initials}
+                {patients.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: 'var(--sp-outline)' }} />
+                    <p className="text-sm font-bold" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>No patients assigned yet</p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--sp-outline)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>You can claim unassigned patients below</p>
+                  </div>
+                ) : (
+                  patients.map(p => {
+                    const isSelected = selectedPatient?.patientId === p.patientId;
+                    const initials = p.fullName?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                    return (
+                      <button
+                        key={p.patientId}
+                        onClick={() => handleSelectPatient(p.patientId)}
+                        className="w-full text-left p-3 rounded-xl border transition-all duration-200"
+                        style={{
+                          background: isSelected ? 'var(--sp-primary-fixed)' : 'var(--sp-surface-low)',
+                          borderColor: isSelected ? 'var(--sp-primary)' : 'var(--sp-outline-var)',
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                               style={{
+                                 background: isSelected ? 'var(--sp-primary-container)' : 'var(--sp-surface-highest)',
+                                 color: isSelected ? '#fff' : 'var(--sp-on-surface-var)',
+                                 fontFamily: '"Plus Jakarta Sans", sans-serif'
+                               }}>
+                            {initials}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{p.fullName}</p>
+                            <p className="text-xs" style={{ color: 'var(--sp-outline)' }}>Age {p.age}</p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            {p.activeCycleStatus && p.activeCycleStatus !== 'No Active Cycle' && (
+                              <span className="sp-badge sp-badge-teal" style={{ fontSize: '10px' }}>{p.activeCycleStatus}</span>
+                            )}
+                            <ChevronRight className="w-4 h-4" style={{ color: isSelected ? 'var(--sp-primary)' : 'var(--sp-outline-var)' }} />
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{p.fullName}</p>
-                          <p className="text-xs" style={{ color: 'var(--sp-outline)' }}>Age {p.age}</p>
+                      </button>
+                    );
+                  })
+                )}
+
+                {unassignedPatients.length > 0 && (
+                  <div className="mt-8 pt-6 border-t" style={{ borderColor: 'var(--sp-surface-container)' }}>
+                    <h3 className="text-sm font-bold mb-4" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Available Unassigned Patients</h3>
+                    <div className="space-y-3">
+                      {unassignedPatients.map(up => (
+                        <div key={up.patientId} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--sp-surface-lowest)', border: '1px dashed var(--sp-outline-var)' }}>
+                          <div>
+                            <p className="text-sm font-bold" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{up.fullName}</p>
+                            <p className="text-xs" style={{ color: 'var(--sp-outline)' }}>{up.email}</p>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={() => handleClaimPatient(up.patientId)}
+                            className="sp-btn-secondary text-[11px] h-8 px-3"
+                          >
+                            Claim
+                          </button>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
-                          {p.activeCycleStatus && p.activeCycleStatus !== 'No Active Cycle' && (
-                            <span className="sp-badge sp-badge-teal" style={{ fontSize: '10px' }}>{p.activeCycleStatus}</span>
-                          )}
-                          <ChevronRight className="w-4 h-4" style={{ color: isSelected ? 'var(--sp-primary)' : 'var(--sp-outline-var)' }} />
-                        </div>
-                      </div>
-                    </button>
-                  );
-                }) : (
-                  <div className="text-center py-8">
-                    <Users className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--sp-outline-var)' }} />
-                    <p className="text-sm" style={{ color: 'var(--sp-outline)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>No patients assigned yet</p>
-                    <p className="text-xs mt-1" style={{ color: 'var(--sp-outline)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Patients are assigned by admin or when they register</p>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
