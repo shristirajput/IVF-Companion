@@ -102,7 +102,19 @@ public class AdminController {
     // Get all doctors for assignment dropdown
     @GetMapping("/doctors")
     public ResponseEntity<?> getAllDoctors() {
-        return ResponseEntity.ok(doctorRepository.findAll());
+        List<Map<String, Object>> response = doctorRepository.findAll().stream().map(d -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", d.getId());
+            
+            Map<String, Object> userMap = new HashMap<>();
+            if (d.getUser() != null) {
+                userMap.put("fullName", d.getUser().getFullName());
+            }
+            map.put("user", userMap);
+            
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     // Assign a doctor to a patient
