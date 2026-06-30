@@ -133,4 +133,58 @@ public class AdminController {
         
         return ResponseEntity.ok().build();
     }
+
+    // Get all IVF cycles
+    @GetMapping("/cycles")
+    public ResponseEntity<?> getAllCycles() {
+        List<Map<String, Object>> response = ivfCycleRepository.findAll().stream().map(c -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", c.getId());
+            map.put("startDate", c.getStartDate());
+            map.put("status", c.getStatus());
+            map.put("currentDay", c.getCurrentDay());
+            if (c.getPatient() != null && c.getPatient().getUser() != null) {
+                map.put("patientName", c.getPatient().getUser().getFullName());
+            }
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+    // Get all appointments
+    @GetMapping("/appointments")
+    public ResponseEntity<?> getAllAppointments() {
+        List<Map<String, Object>> response = appointmentRepository.findAll().stream().map(a -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", a.getId());
+            map.put("title", a.getTitle());
+            map.put("dateTime", a.getDateTime());
+            map.put("status", a.getStatus());
+            if (a.getPatient() != null && a.getPatient().getUser() != null) {
+                map.put("patientName", a.getPatient().getUser().getFullName());
+            }
+            if (a.getDoctor() != null && a.getDoctor().getUser() != null) {
+                map.put("doctorName", a.getDoctor().getUser().getFullName());
+            }
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+    // Get all forum posts
+    @GetMapping("/posts")
+    public ResponseEntity<?> getAllPosts() {
+        List<Map<String, Object>> response = forumPostRepository.findAll().stream().map(p -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", p.getId());
+            map.put("title", p.getTitle());
+            map.put("createdAt", p.getCreatedAt());
+            map.put("isAnonymous", p.isAnonymous());
+            if (p.getAuthor() != null) {
+                map.put("authorName", p.getAuthor().getFullName());
+            }
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
 }

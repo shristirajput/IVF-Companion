@@ -6,27 +6,35 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [cycles, setCycles] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [filter, setFilter] = useState('ALL');
 
   useEffect(() => { fetchAdminData(); }, []);
 
   const fetchAdminData = async () => {
     try {
       setLoading(true);
-      const [statsRes, usersRes, doctorsRes] = await Promise.all([
+      const [statsRes, usersRes, doctorsRes, cyclesRes, apptsRes, postsRes] = await Promise.all([
         api.get('/api/admin/stats'),
         api.get('/api/admin/users'),
-        api.get('/api/admin/doctors')
+        api.get('/api/admin/doctors'),
+        api.get('/api/admin/cycles').catch(() => ({ data: [] })),
+        api.get('/api/admin/appointments').catch(() => ({ data: [] })),
+        api.get('/api/admin/posts').catch(() => ({ data: [] }))
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data);
       setDoctors(doctorsRes.data);
+      setCycles(cyclesRes.data || []);
+      setAppointments(apptsRes.data || []);
+      setPosts(postsRes.data || []);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
-
-  const handleToggleActive = async (userId) => {
     try {
       setActionLoading(true);
       await api.put(`/api/admin/users/${userId}/toggle-active`);
@@ -109,12 +117,21 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      {/* Users List */}
+      {/* Data Lists */}
       <div className="sp-card overflow-hidden animate-fade-up" style={{ animationDelay: '0.1s' }}>
         <div className="p-6 border-b flex justify-between items-center" style={{ background: 'var(--sp-surface-low)', borderColor: 'var(--sp-outline-var)' }}>
           <h2 className="text-base font-bold flex items-center gap-2" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-            <Users className="w-5 h-5" style={{ color: 'var(--sp-primary)' }} />
-            {filter === 'ROLE_PATIENT' ? 'Patients' : filter === 'ROLE_DOCTOR' ? 'Doctors' : 'All Platform Users'}
+            {filter === 'CYCLES' ? <Activity className="w-5 h-5 text-[var(--sp-secondary)]" /> :
+             filter === 'APPOINTMENTS' ? <Calendar className="w-5 h-5 text-[var(--sp-primary)]" /> :
+             filter === 'POSTS' ? <FileText className="w-5 h-5 text-[var(--sp-secondary)]" /> :
+             <Users className="w-5 h-5 text-[var(--sp-primary)]" />}
+             
+            {filter === 'ROLE_PATIENT' ? 'Patients' : 
+             filter === 'ROLE_DOCTOR' ? 'Doctors' : 
+             filter === 'CYCLES' ? 'All IVF Cycles' :
+             filter === 'APPOINTMENTS' ? 'All Appointments' :
+             filter === 'POSTS' ? 'All Forum Posts' :
+             'All Platform Users'}
           </h2>
           {filter !== 'ALL' && (
             <button onClick={() => setFilter('ALL')} className="text-xs font-bold text-blue-600 hover:underline">
@@ -124,76 +141,154 @@ export default function AdminDashboard() {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
-                <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>User</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Role</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Status</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Joined</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Assigned Doctor</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-widest text-right" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((u) => (
-                <tr key={u.id} className="transition-colors hover:bg-black/5" style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" 
-                           style={{ background: 'var(--sp-surface-highest)', color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                        {u.fullName.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-bold" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{u.fullName}</div>
-                        <div className="text-xs" style={{ color: 'var(--sp-outline)' }}>{u.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className="sp-badge text-[10px]" style={{ background: u.role === 'ADMIN' ? 'var(--sp-primary-container)' : 'var(--sp-surface-highest)', color: u.role === 'ADMIN' ? 'var(--sp-on-primary-container)' : 'var(--sp-on-surface-var)' }}>
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <span className="sp-badge text-[10px]" style={{ background: u.active ? '#e6f7ec' : 'var(--sp-error-container)', color: u.active ? '#007a4d' : 'var(--sp-on-error-container)' }}>
-                      {u.active ? 'Active' : 'Blocked'}
-                    </span>
-                  </td>
-                  <td className="p-4 text-sm" style={{ color: 'var(--sp-on-surface-var)' }}>
-                    {new Date(u.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="p-4">
-                    {u.role === 'PATIENT' ? (
-                      <select 
-                        className="sp-input text-xs h-8 py-0 px-2"
-                        value={u.assignedDoctorId || ''}
-                        onChange={(e) => handleAssignDoctor(u.id, e.target.value)}
-                        disabled={actionLoading}
-                      >
-                        <option value="">-- Assign Doctor --</option>
-                        {doctors.map(d => (
-                          <option key={d.id} value={d.id}>Dr. {d.user?.fullName || 'Unknown'}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className="text-xs text-slate-400">N/A</span>
-                    )}
-                  </td>
-                  <td className="p-4 text-right">
-                    <button
-                      onClick={() => handleToggleActive(u.id)}
-                      disabled={actionLoading || u.username === 'admin'}
-                      className="sp-btn-secondary text-[11px] h-8 px-3 disabled:opacity-50"
-                      style={{ border: u.active ? '1px solid var(--sp-error)' : '1px solid var(--sp-primary)', color: u.active ? 'var(--sp-error)' : 'var(--sp-primary)' }}
-                    >
-                      {u.active ? <><UserX className="w-3 h-3 mr-1" /> Block</> : 'Unblock'}
-                    </button>
-                  </td>
+          {['ALL', 'ROLE_PATIENT', 'ROLE_DOCTOR'].includes(filter) && (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>User</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Role</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Status</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Joined</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Assigned Doctor</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest text-right" style={{ color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredUsers.map((u) => (
+                  <tr key={u.id} className="transition-colors hover:bg-black/5" style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" 
+                             style={{ background: 'var(--sp-surface-highest)', color: 'var(--sp-on-surface-var)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                          {u.fullName.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{u.fullName}</div>
+                          <div className="text-xs" style={{ color: 'var(--sp-outline)' }}>{u.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className="sp-badge text-[10px]" style={{ background: u.role === 'ADMIN' ? 'var(--sp-primary-container)' : 'var(--sp-surface-highest)', color: u.role === 'ADMIN' ? 'var(--sp-on-primary-container)' : 'var(--sp-on-surface-var)' }}>
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <span className="sp-badge text-[10px]" style={{ background: u.active ? '#e6f7ec' : 'var(--sp-error-container)', color: u.active ? '#007a4d' : 'var(--sp-on-error-container)' }}>
+                        {u.active ? 'Active' : 'Blocked'}
+                      </span>
+                    </td>
+                    <td className="p-4 text-sm" style={{ color: 'var(--sp-on-surface-var)' }}>
+                      {new Date(u.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-4">
+                      {u.role === 'PATIENT' ? (
+                        <select 
+                          className="sp-input text-xs h-8 py-0 px-2"
+                          value={u.assignedDoctorId || ''}
+                          onChange={(e) => handleAssignDoctor(u.id, e.target.value)}
+                          disabled={actionLoading}
+                        >
+                          <option value="">-- Assign Doctor --</option>
+                          {doctors.map(d => (
+                            <option key={d.id} value={d.id}>Dr. {d.user?.fullName || 'Unknown'}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-xs text-slate-400">N/A</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => handleToggleActive(u.id)}
+                        disabled={actionLoading || u.username === 'admin'}
+                        className="sp-btn-secondary text-[11px] h-8 px-3 disabled:opacity-50"
+                        style={{ border: u.active ? '1px solid var(--sp-error)' : '1px solid var(--sp-primary)', color: u.active ? 'var(--sp-error)' : 'var(--sp-primary)' }}
+                      >
+                        {u.active ? <><UserX className="w-3 h-3 mr-1" /> Block</> : 'Unblock'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {filter === 'CYCLES' && (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">ID</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Patient</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Start Date</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Cycle Day</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cycles.map(c => (
+                  <tr key={c.id} className="transition-colors hover:bg-black/5" style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
+                    <td className="p-4 text-sm">#{c.id}</td>
+                    <td className="p-4 text-sm font-bold">{c.patientName || 'Unknown'}</td>
+                    <td className="p-4 text-sm">{c.startDate ? new Date(c.startDate).toLocaleDateString() : 'N/A'}</td>
+                    <td className="p-4 text-sm">Day {c.currentDay || 1}</td>
+                    <td className="p-4"><span className="sp-badge text-[10px] bg-blue-100 text-blue-800">{c.status}</span></td>
+                  </tr>
+                ))}
+                {cycles.length === 0 && <tr><td colSpan="5" className="p-8 text-center text-sm text-slate-500">No IVF Cycles found.</td></tr>}
+              </tbody>
+            </table>
+          )}
+
+          {filter === 'APPOINTMENTS' && (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Title</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Date & Time</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Patient</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Doctor</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appointments.map(a => (
+                  <tr key={a.id} className="transition-colors hover:bg-black/5" style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
+                    <td className="p-4 text-sm font-bold">{a.title}</td>
+                    <td className="p-4 text-sm">{new Date(a.dateTime).toLocaleString()}</td>
+                    <td className="p-4 text-sm">{a.patientName || 'Unknown'}</td>
+                    <td className="p-4 text-sm">Dr. {a.doctorName || 'Unknown'}</td>
+                    <td className="p-4"><span className="sp-badge text-[10px] bg-indigo-100 text-indigo-800">{a.status}</span></td>
+                  </tr>
+                ))}
+                {appointments.length === 0 && <tr><td colSpan="5" className="p-8 text-center text-sm text-slate-500">No Appointments found.</td></tr>}
+              </tbody>
+            </table>
+          )}
+
+          {filter === 'POSTS' && (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Title</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Author</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Created At</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-widest">Visibility</th>
+                </tr>
+              </thead>
+              <tbody>
+                {posts.map(p => (
+                  <tr key={p.id} className="transition-colors hover:bg-black/5" style={{ borderBottom: '1px solid var(--sp-surface-container)' }}>
+                    <td className="p-4 text-sm font-bold">{p.title}</td>
+                    <td className="p-4 text-sm">{p.isAnonymous ? 'Anonymous' : (p.authorName || 'Unknown')}</td>
+                    <td className="p-4 text-sm">{new Date(p.createdAt).toLocaleDateString()}</td>
+                    <td className="p-4 text-sm">{p.isAnonymous ? 'Private/Anon' : 'Public'}</td>
+                  </tr>
+                ))}
+                {posts.length === 0 && <tr><td colSpan="4" className="p-8 text-center text-sm text-slate-500">No Forum Posts found.</td></tr>}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
