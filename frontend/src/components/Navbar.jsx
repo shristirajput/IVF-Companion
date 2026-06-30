@@ -3,8 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Calendar, Brain, Users, FileText,
-  LogOut, Menu, X, Bell, ChevronDown
+  LogOut, Menu, X, Bell, ChevronDown, CheckCircle2, Clock
 } from 'lucide-react';
+import api from '../utils/api';
 
 const NAV_LINKS = [
   { href: '/dashboard',       label: 'Dashboard',    icon: LayoutDashboard, roles: ['ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_ADMIN'] },
@@ -20,6 +21,34 @@ export default function Navbar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user]);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/api/notifications');
+      setNotifications(res.data);
+    } catch (e) {
+      console.error('Failed to fetch notifications:', e);
+    }
+  };
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await api.put(`/api/notifications/${id}/read`);
+      setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+    } catch (e) {
+      console.error('Failed to mark notification as read:', e);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleLogout = () => {
     logout();
@@ -99,19 +128,75 @@ export default function Navbar() {
             {user ? (
               <>
                 {/* Notification bell */}
-                <button
-                  className="relative w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-                  style={{ background: 'var(--sp-surface-container)' }}
-                  title="Notifications"
-                >
-                  <Bell className="w-5 h-5" style={{ color: 'var(--sp-on-surface-var)' }} />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: 'var(--sp-error)' }} />
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
+                    className="relative w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
+                    style={{ background: notifOpen ? 'var(--sp-surface-highest)' : 'var(--sp-surface-container)' }}
+                    title="Notifications"
+                  >
+                    <Bell className="w-5 h-5" style={{ color: 'var(--sp-on-surface-var)' }} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: 'var(--sp-error)' }} />
+                    )}
+                  </button>
+
+                  {notifOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border py-2 animate-fade-in z-50 shadow-elevated"
+                         style={{ background: '#fff', borderColor: 'var(--sp-outline-var)' }}>
+                      <div className="px-4 py-2.5 border-b flex justify-between items-center" style={{ borderColor: 'var(--sp-surface-container)' }}>
+                        <h4 className="text-sm font-bold" style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Notifications</h4>
+                        {unreadCount > 0 && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--sp-error-container)', color: 'var(--sp-on-error-container)' }}>
+                            {unreadCount} new
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        {notifications.length === 0 ? (
+                          <div className="py-8 text-center">
+                            <Bell className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                            <p className="text-sm" style={{ color: 'var(--sp-outline)' }}>You're all caught up!</p>
+                          </div>
+                        ) : (
+                          notifications.map(notif => (
+                            <div key={notif.id} className="px-4 py-3 border-b last:border-0 hover:bg-slate-50 transition-colors relative"
+                                 style={{ borderColor: 'var(--sp-surface-container)' }}>
+                              <div className="flex gap-3">
+                                <div className="mt-0.5">
+                                  {notif.type === 'APPOINTMENT' ? <Calendar className="w-4 h-4 text-blue-500" /> :
+                                   notif.type === 'REMINDER' ? <Clock className="w-4 h-4 text-amber-500" /> :
+                                   <Bell className="w-4 h-4 text-slate-400" />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-sm ${!notif.read ? 'font-bold' : ''}`} style={{ color: 'var(--sp-on-surface)', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                                    {notif.message}
+                                  </p>
+                                  <p className="text-xs mt-1" style={{ color: 'var(--sp-outline)' }}>
+                                    {new Date(notif.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                                  </p>
+                                </div>
+                                {!notif.read && (
+                                  <button onClick={() => handleMarkAsRead(notif.id)} className="flex-shrink-0 text-slate-400 hover:text-blue-500 transition-colors" title="Mark as read">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                              {!notif.read && (
+                                <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: 'var(--sp-primary)' }} />
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Profile dropdown */}
                 <div className="relative">
                   <button
-                    onClick={() => setProfileOpen(o => !o)}
+                    onClick={() => { setProfileOpen(o => !o); setNotifOpen(false); }}
                     className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border transition-all"
                     style={{
                       borderColor: profileOpen ? 'var(--sp-primary)' : 'var(--sp-outline-var)',

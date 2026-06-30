@@ -162,7 +162,66 @@ public class DoctorController {
         return ResponseEntity.ok(saved);
     }
 
+    // Get all appointments booked with this doctor (from patients booking directly)
+    @GetMapping("/appointments")
+    public ResponseEntity<?> getDoctorAppointments(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Doctor doctor = doctorRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
+
+        List<Appointment> appointments = appointmentRepository.findByDoctorId(doctor.getId());
+
+        List<Map<String, Object>> response = appointments.stream().map(appt -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", appt.getId());
+            map.put("title", appt.getTitle());
+            map.put("dateTime", appt.getDateTime());
+            map.put("status", appt.getStatus());
+            map.put("notes", appt.getNotes());
+            if (appt.getPatient() != null) {
+                map.put("patientName", appt.getPatient().getUser().getFullName());
+                map.put("patientId", appt.getPatient().getId());
+            }
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Update appointment status (confirm or cancel)
+    @PutMapping("/appointments/{apptId}/status")
+    public ResponseEntity<?> updateAppointmentStatus(
+            @PathVariable Long apptId,
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Doctor doctor = doctorRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
+
+        Appointment appt = appointmentRepository.findById(apptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found."));
+
+        if (!appt.getDoctor().getId().equals(doctor.getId())) {
+            return ResponseEntity.status(403).body("Access Denied");
+        }
+
+        String newStatus = body.get("status");
+        appt.setStatus(newStatus);
+        Appointment saved = appointmentRepository.save(appt);
+
+        // Notify patient
+        Notification notification = new Notification();
+        notification.setUser(appt.getPatient().getUser());
+        notification.setMessage(String.format("Your appointment '%s' has been %s by Dr. %s.",
+                appt.getTitle(), newStatus.toLowerCase(), doctor.getUser().getFullName()));
+        notification.setType("APPOINTMENT");
+        notification.setRead(false);
+        notificationRepository.save(notification);
+
+        return ResponseEntity.ok(saved);
+    }
+
     // Private helper to verify that the doctor is actually assigned to the queried patient
+
     private Doctor verifyDoctorAccess(Long patientId, Long userId) {
         Doctor doctor = doctorRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
